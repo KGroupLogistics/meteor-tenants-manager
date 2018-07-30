@@ -1,0 +1,13 @@
+.DS_Store
+Thumbs.db
+packages
+*~
+versions.json
+.versions
+smart.lock
+.build*
+.npm*
+node_modules
+npm-debug.log
+*.sublime-workspace
+.vscode
