@@ -22,7 +22,7 @@ See [Securing MongoDB to Serve an AWS-Based, Multi-Tenant, Security-Fanatic SaaS
 
 ### Setup
 
-* Install `meteor add aserranom:tenants-manager`.
+* Install `meteor add aserrano:tenants-manager`.
 * Use DISABLE_WEBSOCKETS=1 environment variable (ie: `DISABLE_WEBSOCKETS=1 meteor`).
 * Setup subdomains for your app (eg: 'tenant1'). _If you want to try this locally I suggest you setup your `/etc/hosts` file with a row per tenant of the form: `127.0.0.1 tenant1.testing-app.com`, and then on your browser go to `tenant1.testing-app.com:3000`._
 
@@ -31,7 +31,7 @@ See [Securing MongoDB to Serve an AWS-Based, Multi-Tenant, Security-Fanatic SaaS
 Create a tenant on the server via the `TenantsManager`'s `createTenant` method, you'll need to provide the `subdomain` and the `databaseName`.
 
 ```javascript
-import { TenantsManager } from 'meteor/aserranom:tenants-manager';
+import { TenantsManager } from 'meteor/aserrano:tenants-manager';
 
 TenantsManager.createTenant({ subdomain: 'tenant1', databaseName: 'tenant1' });
 ```
@@ -44,7 +44,7 @@ However the server must add the tenanted collection via the `TenantsManager`'s `
 ```javascript
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
-import { TenantsManager } from 'meteor/aserranom:tenants-manager';
+import { TenantsManager } from 'meteor/aserrano:tenants-manager';
 
 if (Meteor.isClient) {
   export const Experiments = new Mongo.Collection('experiments');
@@ -64,7 +64,7 @@ The manager will automatically get the collection for the subdomain that is maki
 
 ```javascript
 import { Meteor } from 'meteor/meteor';
-import { TenantsManager } from 'meteor/aserranom:tenants-manager';
+import { TenantsManager } from 'meteor/aserrano:tenants-manager';
 
 // eslint-disable-next-line prefer-arrow-callback
 Meteor.publish('experiments', function publishExperiments() {
