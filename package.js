@@ -1,7 +1,7 @@
 /* globals Package, Npm */
 Package.describe({
   name: 'aserrano:tenants-manager',
-  version: '0.0.2',
+  version: '0.0.3',
   // Brief, one-line summary of the package.
   summary: 'Exploring a multi-tenant solution for Meteor.',
   // URL to the Git repository containing the source code for this package.
@@ -21,6 +21,7 @@ Package.onUse((api) => {
   api.use('ecmascript');
   api.use('mongo');
   api.use('ddp');
+  api.use('accounts-base');
   api.use('aldeed:collection2@3.0.0');
   api.mainModule('server_main.js', 'server');
   api.mainModule('client_main.js', 'client');

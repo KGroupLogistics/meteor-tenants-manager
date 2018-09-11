@@ -1,14 +1,15 @@
 # meteor-tenant-manager
 
-# 🚫🚫🚫🚫🚫 Not production ready 🚫🚫🚫🚫🚫
-I'm just playing around with some ideas.
+# 🚫🚫🚫🚫🚫 Proof of Concept: Not production intended 🚫🚫🚫🚫🚫
+I'm just playing around with some ideas. 
 
 Current issues:
-- [ ] No defined way to manage a tenant's user authentication.
-- [ ] Still too much overhead to use a tenant's Collections on publications and methods.
+- [ ] No defined way to manage a tenant's user authentication: I'm not seeing much future for this since Accounts doesn't keep the context when calling the loginWith* methods (thus TenantCollection is unable to retrieve the caller's subdomain)...
+- [x] Still too much overhead to use a tenant's Collections on publications and methods: *Solved this by creating the TenantCollection class. TenantCollection extends Mongo.Collection and overwrites the _collection property, with a generalized, getter version of the original code that recalculates the collection's driver with the one that corresponds to the caller's subdomain.*
 - [ ] Make it work with websockets
-- [ ] Testing
 - [ ] ...
+
+I don't intend to work on this proof of concept anymore given the hacks needed make this work. Plus, theres no clear view to tenantify Accounts.
 
 ## Inspiration
 
@@ -39,36 +40,27 @@ TenantsManager.createTenant({ subdomain: 'tenant1', databaseName: 'tenant1' });
 ### Creating a tenanted collection
 
 The client is not aware of the tenant structure on the server, so we create a collection as we usually do.
-However the server must add the tenanted collection via the `TenantsManager`'s `addCollection` method providing only the `collectionName`.
+However the server must add the tenanted collection via `TenantCollection`.
 
 ```javascript
-import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
-import { TenantsManager } from 'meteor/aserrano:tenants-manager';
+import { Meteor } from 'meteor/meteor';
+import { TenantCollection } from 'meteor/aserrano:tenants-manager';
 
-if (Meteor.isClient) {
-  export const Experiments = new Mongo.Collection('experiments');
-}
-
-if (Meteor.isServer) {
-  TenantsManager.addCollection({
-    collectionName: 'Experiments',
-  });
-}
+export const Experiments = Meteor.isClient ? new Mongo.Collection('experiments') :
+  new TenantCollection('experiments');
 ```
 
 ### Using a collection (inside a Meteor Method or Publication)
 
-On a server method/publication you must access tenanted collections via the `TenantsManager`'s `getCollection` method.
+On a server method/publication you can use the collection as usual.
 The manager will automatically get the collection for the subdomain that is making the request (only when using DISABLE_WEBSOCKETS=1 flag).
 
 ```javascript
 import { Meteor } from 'meteor/meteor';
-import { TenantsManager } from 'meteor/aserrano:tenants-manager';
 
 // eslint-disable-next-line prefer-arrow-callback
 Meteor.publish('experiments', function publishExperiments() {
-  const Experiments = TenantsManager.getCollection({ collectionName: 'Experiments' });
   return Experiments.find();
 });
 ```

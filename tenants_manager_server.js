@@ -2,7 +2,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import { DDP } from 'meteor/ddp';
-import camelCase from 'camelcase';
+import camelCase from 'camelCase';
 
 import { TenantsManagerCommon } from './tenants_manager_common';
 
@@ -17,7 +17,7 @@ import { TenantsManagerCommon } from './tenants_manager_common';
 // [*] Support getCollection for an specific tenant.
 // [ ] Use Meteor.EnviromentVariable to scope subdomain for non client originated functions.
 // [ ] Alternatives to subdomain based tenants
-// [ ] Find an easier way to retrieve a tenant's collection, in methods and publications...
+// [*] Find an easier way to retrieve a tenant's collection, in methods and publications...
 //     For example Shoes = new TenantedCollection('shoes');
 //     Shoes.find() --> changes Shoes instance's _driver to point to tenant's db. However changing that instance
 //     will affect all other tenants...
@@ -27,6 +27,7 @@ class TenantsManagerServer extends TenantsManagerCommon {
     super();
 
     this._server = Meteor.server;
+    // Connection listener used to determine and set the subdomain.
     this._server.onConnection((connection) => {
       const { httpHeaders: { host } } = connection;
       connection.subdomain = host.split(':')[0].split('.').slice(0, -2).join('.');
@@ -63,6 +64,13 @@ class TenantsManagerServer extends TenantsManagerCommon {
       const { subdomain } = tenantsManager;
       return tenantsManager.tenants.find({ subdomain }, { fields: { subdomain: 1 } });
     });
+  }
+
+  getCurrentTenant() {
+    const tenantsManager = this;
+    const { subdomain: currentSubdomain } = tenantsManager;
+    return tenantsManager._initializedTenants.find(({ subdomain }) =>
+      subdomain === currentSubdomain);
   }
 
   getCollection({ collectionName, tenant }) {
@@ -111,7 +119,7 @@ class TenantsManagerServer extends TenantsManagerCommon {
 
     const collections = {};
     this._collectionsNames.forEach((collectionName) => {
-      collections[collectionName] = new Mongo.Collection(camelCase(collectionName), {
+      collections[collectionName] = new Mongo.Collection(collectionName, {
         _driver: connection,
         _suppressSameNameError: true,
       });
